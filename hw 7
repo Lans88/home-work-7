@@ -1,0 +1,790 @@
+import UIKit
+import Foundation
+
+protocol CarProtocol {
+    var model: String { get } //марка
+    var color: String { get } //цвет
+    var buildDate: Int { get } //год выпуска
+    var price: Double { get set } //цена
+    var accessories: [String] { get set } //доп.оборудование
+    var isServiced: Bool { get set } // предпродажная подготовка
+}
+
+
+protocol DealerShipProtocol {
+    var name: String { get } // название дилера
+    var showroomCapacity: Int { get } // вместимость салона
+    var stockCars: [CarProtocol] { get set } // машины на складе
+    var showroomCars: [CarProtocol] { get set } // машины в шоуруме
+    var cars: [CarProtocol] { get } // машины в целом в наличии
+    var slogan: String { get set }
+    func offerAccesories(access: [String]) // предложение о покупке допов
+    mutating func presaleService(car: inout CarProtocol)  // отправка машины на предпродажку
+    mutating func addToShowroom (car: inout CarProtocol) // перегон авто со склада в шоурум
+    mutating func sellCar(car: inout CarProtocol) // продажа авто
+    mutating func orderCar() // заказ новой машины с завода, добавление авто на склад
+    
+}
+
+enum Errors: Error {
+    case impoliteBuild
+    case autoInShowroom
+}
+
+protocol SpecialOffer {
+    mutating func addEmergencyPack()
+    mutating func makeSpecialOffer() throws
+}
+
+struct Audi: CarProtocol, Equatable {
+    var model: String
+    var color: String
+    var buildDate: Int
+    var price: Double
+    var accessories: [String]
+    var isServiced: Bool
+}
+
+struct BMW: CarProtocol, Equatable {
+    var model: String
+    var color: String
+    var buildDate: Int
+    var price: Double
+    var accessories: [String]
+    var isServiced: Bool
+}
+
+struct MercedesBenz: CarProtocol, Equatable {
+    var model: String
+    var color: String
+    var buildDate: Int
+    var price: Double
+    var accessories: [String]
+    var isServiced: Bool
+}
+
+struct Porsche: CarProtocol, Equatable {
+    var model: String
+    var color: String
+    var buildDate: Int
+    var price: Double
+    var accessories: [String]
+    var isServiced: Bool
+}
+
+struct Bentley: CarProtocol, Equatable {
+    var model: String
+    var color: String
+    var buildDate: Int
+    var price: Double
+    var accessories: [String]
+    var isServiced: Bool
+}
+
+
+
+var colors: [String] = ["Black", "Green", "White", "Red", "Blue", "Grey", "Orange", "Yellow", "Silver" ]
+var audiModels: [String] = []
+var audiModelsPrice: [String: Double] = [:]
+var bmwModels: [String] = []
+var bmwModelsPrice: [String: Double] = [:]
+var mercedesModels: [String] = []
+var mercedesModelsPrice: [String: Double] = [:]
+var porscheModels: [String] = []
+var porscheModelsPrice: [String: Double] = [:]
+var bentleyModels: [String] = []
+var bentleyModelsPrice: [String: Double] = [:]
+
+
+//Audi
+var a3 = Audi(model: "A3", color: "Black", buildDate: 2022, price: 35000, accessories: ["Тонировка, спортивные диски, сигнализация"], isServiced: true)
+audiModels.append(a3.model)
+audiModelsPrice.updateValue(a3.price, forKey: a3.model)
+
+var a5 = Audi(model: "A5", color: "White", buildDate: 2021, price: 70000, accessories: ["Тонировка"], isServiced: true)
+audiModels.append(a5.model)
+audiModelsPrice.updateValue(a5.price, forKey: a5.model)
+
+var a6: CarProtocol = Audi(model: "A6", color: "Grey", buildDate: 2022, price: 79000, accessories: [], isServiced: false)
+audiModels.append(a6.model)
+audiModelsPrice.updateValue(a6.price, forKey: a6.model)
+
+var rsq8 = Audi(model: "RSQ8", color: "Red", buildDate: 2022, price: 248000, accessories: ["Спортивные диски"], isServiced: false)
+audiModels.append(rsq8.model)
+audiModelsPrice.updateValue(rsq8.price, forKey: rsq8.model)
+
+var rs4 = Audi(model: "RS4", color: "Silver", buildDate: 2021, price: 190000, accessories: ["Сигнализация"], isServiced: true)
+audiModels.append(rs4.model)
+audiModelsPrice.updateValue(rs4.price, forKey: rs4.model)
+
+
+//BMW
+var i318 = BMW(model: "318i", color: "White", buildDate: 2021, price: 36000, accessories: ["Тонировка"], isServiced: true)
+bmwModels.append(i318.model)
+bmwModelsPrice.updateValue(i318.price, forKey: i318.model)
+
+var d530 = BMW(model: "530d", color: "Black", buildDate: 2021, price: 89000, accessories: ["Тонировка", "Сигнализация", "Спортивные диски"], isServiced: true)
+bmwModels.append(d530.model)
+bmwModelsPrice.updateValue(d530.price, forKey: d530.model)
+
+var m5cs: CarProtocol = BMW(model: "M5cs", color: "Green", buildDate: 2022, price: 230000, accessories: ["Тонировка"], isServiced: false)
+bmwModels.append(m5cs.model)
+bmwModelsPrice.updateValue(m5cs.price, forKey: m5cs.model)
+
+var x5m50d = BMW(model: "X5M50D", color: "Blue", buildDate: 2022, price: 250000, accessories: ["Сигнализация"], isServiced: false)
+bmwModels.append(x5m50d.model)
+bmwModelsPrice.updateValue(x5m50d.price, forKey: x5m50d.model)
+
+var d750 = BMW(model: "750D", color: "Black", buildDate: 2022, price: 236000, accessories: ["Тонировка", "Сигнализация"], isServiced: false)
+bmwModels.append(d750.model)
+bmwModelsPrice.updateValue(d750.price, forKey: d750.model)
+
+//Mersedes
+var g63amg = MercedesBenz(model: "G63AMG", color: "Black", buildDate: 2021, price: 260000, accessories: ["Тонировка", "Сигнализация"], isServiced: true)
+mercedesModels.append(g63amg.model)
+mercedesModelsPrice.updateValue(g63amg.price, forKey: g63amg.model)
+
+var s500 = MercedesBenz(model: "S500", color: "white", buildDate: 2022, price: 237900, accessories: [], isServiced: false)
+mercedesModels.append(s500.model)
+mercedesModelsPrice.updateValue(s500.price, forKey: s500.model)
+
+var e63amg: CarProtocol = MercedesBenz(model: "E63AMG", color: "Grey", buildDate: 2021, price: 229000, accessories: ["Сигнализация"], isServiced: true)
+mercedesModels.append(e63amg.model)
+mercedesModelsPrice.updateValue(e63amg.price, forKey: e63amg.model)
+
+var gle400d = MercedesBenz(model: "GLE400D", color: "Red", buildDate: 2022, price: 178900, accessories: [], isServiced: false)
+mercedesModels.append(gle400d.model)
+mercedesModelsPrice.updateValue(gle400d.price, forKey: gle400d.model)
+
+var e200d = MercedesBenz(model: "E200D", color: "Green", buildDate: 2022, price: 148000, accessories: [], isServiced: true)
+mercedesModels.append(e200d.model)
+mercedesModelsPrice.updateValue(e200d.price, forKey: e200d.model)
+
+// Porsche
+var cayenne = Porsche(model: "Cayenne", color: "Red", buildDate: 2022, price: 268000, accessories: [], isServiced: false)
+porscheModels.append(cayenne.model)
+porscheModelsPrice.updateValue(cayenne.price, forKey: cayenne.model)
+
+var cayenneS: CarProtocol = Porsche(model: "Cayenne S", color: "Black", buildDate: 2021, price: 278000, accessories: ["Спортивные диски"], isServiced: true)
+porscheModels.append(cayenneS.model)
+porscheModelsPrice.updateValue(cayenneS.price, forKey: cayenneS.model)
+
+var cayman = Porsche(model: "Cayman", color: "Yellow", buildDate: 2020, price: 109000, accessories: ["Тонировка"], isServiced: true)
+porscheModels.append(cayman.model)
+porscheModelsPrice.updateValue(cayman.price, forKey: cayman.model)
+
+var panamera = Porsche(model: "Panamera", color: "Black", buildDate: 2022, price: 140000, accessories: ["Сигнализация"], isServiced: false)
+porscheModels.append(panamera.model)
+porscheModelsPrice.updateValue(panamera.price, forKey: panamera.model)
+
+var boxter = Porsche(model: "Boxter", color: "White", buildDate: 2020, price: 203000, accessories: [], isServiced: true)
+porscheModels.append(boxter.model)
+porscheModelsPrice.updateValue(boxter.price, forKey: boxter.model)
+
+// Bentley
+var continentalGT = Bentley(model: "Continental GT", color: "Blue", buildDate: 2021, price: 267000, accessories: [], isServiced: false)
+bentleyModels.append(continentalGT.model)
+bentleyModelsPrice.updateValue(continentalGT.price, forKey: continentalGT.model)
+
+var bentayga = Bentley(model: "Bentayga", color: "Black", buildDate: 2022, price: 275000, accessories: ["Сигнализация"], isServiced: true)
+bentleyModels.append(bentayga.model)
+bentleyModelsPrice.updateValue(bentayga.price, forKey: bentayga.model)
+
+var mulsanne = Bentley(model: "Mulsanne", color: "Black", buildDate: 2022, price: 276000, accessories: [], isServiced: false)
+bentleyModels.append(mulsanne.model)
+bentleyModelsPrice.updateValue(mulsanne.price, forKey: mulsanne.model)
+
+var flyingSpur = Bentley(model: "Flying Spur", color: "Silver", buildDate: 2021, price: 280000, accessories: [], isServiced: true)
+bentleyModels.append(flyingSpur.model)
+bentleyModelsPrice.updateValue(flyingSpur.price, forKey: flyingSpur.model)
+
+var benleyAzur = Bentley(model: "Bentley Azur", color: "Red", buildDate: 2020, price: 190000, accessories: [], isServiced: false)
+bentleyModels.append(benleyAzur.model)
+bentleyModelsPrice.updateValue(benleyAzur.price, forKey: benleyAzur.model)
+
+class DealerAudi: DealerShipProtocol {
+    var name: String
+    var showroomCapacity: Int
+    var stockCars: [CarProtocol] = []
+    var showroomCars: [CarProtocol] = []
+    var cars: [CarProtocol] {
+        showroomCars + stockCars
+    }
+     var slogan: String = "Продвижение через технологии."
+    
+    init(name: String, showroomCapacity: Int) {
+        self.name = name
+        self.showroomCapacity = showroomCapacity
+    }
+    
+    func offerAccesories(access: [String]) {
+        print("Предложение клиенту купить выбранное доп. оборудование из \(access)")
+    }
+    
+    func presaleService(car: inout CarProtocol) {
+        if car.isServiced == false {
+            car.isServiced = true
+            print("Автомобиль Audi \(car.model) отправлен на предпродажную подготовку.")
+        } else {
+            print("Предпродажная подготовка автомбилю Audi \(car.isServiced) не требуется.")
+        }
+    }
+    
+    func addToShowroom(car: inout CarProtocol) {
+        stockCars.removeAll(where: {$0.model == car.model})
+        if car.isServiced {
+            showroomCars.append(car)
+        } else {
+            presaleService(car: &car)
+            showroomCars.append(car)
+        }
+        print("Автомобиль Audi \(car.model) перемещен со склада в шоурум.")
+        }
+    
+    func sellCar(car: inout CarProtocol) {
+        let originalText = "Автомобиль Audi \(car) продан. Поздравляем с покупкой Вашего нового автомобиля!"
+        //проверка наличия авто у дилера
+        if showroomCars.contains(where: {$0.model == car.model}) == false && stockCars.contains(where: {$0.model == car.model}) == false {
+            print("К сожалению автомобиля Audi \(car.model) нет в наличии, но мы можем его заказать. Срок поставки 2 недели.")
+        } else if showroomCars.contains(where: {$0.model == car.model}) || stockCars.contains(where: {$0.model == car.model}) {
+            //проверка выполнения предпродажной подготовки
+            if car.isServiced == false {
+                presaleService(car: &car)
+                car.isServiced = true
+                print(originalText)
+            } else {
+                print ("Предпродажная подготовка не требуется.")
+                print(originalText)
+            }
+        }
+    }
+    
+    func orderCar() {
+        var tempCar: Audi
+        let randomColorCar = Int.random(in: 0..<colors.count)
+        let randomModelCar = Int.random(in: 0..<audiModels.count)
+        tempCar = .init(model: audiModels[randomModelCar], color: colors[randomColorCar], buildDate: 2022, price: audiModelsPrice[audiModels[randomModelCar]]!, accessories: [], isServiced: false)
+        stockCars.append(tempCar)
+        print("Автомобиль Audi \(tempCar) заказан на склад автосалона от импортера.")
+    }
+}
+
+class DealerBMW: DealerShipProtocol {
+    var name: String
+    var showroomCapacity: Int
+    var stockCars: [CarProtocol] = []
+    var showroomCars: [CarProtocol] = []
+    var cars: [CarProtocol] {
+        showroomCars + stockCars
+        }
+    var slogan: String = "С удовольствием за рулем!"
+    
+    init(name: String, showroomCapacity: Int) {
+        self.name = name
+        self.showroomCapacity = showroomCapacity
+    }
+    
+    func offerAccesories(access: [String]) {
+        print("Предложение клиенту купить выбранное доп. оборудование из \(access)")
+    }
+    
+    func presaleService(car: inout CarProtocol) {
+        if car.isServiced == false {
+            car.isServiced = true
+            print("Автомобиль BMW \(car.model) отправлен на предпродажную подготовку.")
+        } else {
+            print("Предпродажная подготовка автомбилю BMW \(car.isServiced) не требуется.")
+        }
+    }
+    
+    func addToShowroom(car: inout CarProtocol) {
+        stockCars.removeAll(where: {$0.model == car.model})
+        if car.isServiced {
+            showroomCars.append(car)
+        } else {
+            presaleService(car: &car)
+            showroomCars.append(car)
+        }
+        print("Автомобиль BMW \(car.model) перемещен со склада в шоурум.")
+    }
+    
+    func sellCar(car: inout CarProtocol) {
+        let originalText = "Автомобиль BMW \(car) продан. Поздравляем с покупкой Вашего нового автомобиля!"
+        //проверка наличия авто у дилера
+        if showroomCars.contains(where: {$0.model == car.model}) == false && stockCars.contains(where: {$0.model == car.model}) == false {
+            print("К сожалению автомобиля BMW \(car.model) нет в наличии, но мы можем его заказать. Срок поставки 2 недели.")
+        } else if showroomCars.contains(where: {$0.model == car.model}) || stockCars.contains(where: {$0.model == car.model}) {
+            //проверка выполнения предпродажной подготовки
+            if car.isServiced == false {
+                presaleService(car: &car)
+                car.isServiced = true
+                print(originalText)
+            } else {
+                print ("Предпродажная подготовка не требуется.")
+                print(originalText)
+            }
+        }
+    }
+    
+    func orderCar() {
+        var tempCar: BMW
+        let randomColorCar = Int.random(in: 0..<colors.count)
+        let randomModelCar = Int.random(in: 0..<bmwModels.count)
+        tempCar = .init(model: bmwModels[randomModelCar], color: colors[randomColorCar], buildDate: 2022, price: bmwModelsPrice[bmwModels[randomModelCar]]!, accessories: [], isServiced: false)
+        stockCars.append(tempCar)
+        print("Автомобиль \(tempCar) заказан на склад автосалона от импортера.")
+    }
+}
+
+class DealerMercedesBenz: DealerShipProtocol {
+    var name: String
+    var showroomCapacity: Int
+    var stockCars: [CarProtocol] = []
+    var showroomCars: [CarProtocol] = []
+    var cars: [CarProtocol] {
+        showroomCars + stockCars
+        }
+    var slogan: String = "Лучшее или ничего!"
+    
+    init(name: String, showroomCapacity: Int) {
+        self.name = name
+        self.showroomCapacity = showroomCapacity
+    }
+    
+    func offerAccesories(access: [String]) {
+        print("Предложение клиенту купить выбранное доп. оборудование из \(access)")
+    }
+    
+    func presaleService(car: inout CarProtocol) {
+        if car.isServiced == false {
+            car.isServiced = true
+            print("Автомобиль Mercedes Benz \(car.model) отправлен на предпродажную подготовку.")
+        } else {
+            print("Предпродажная подготовка автомбилю Mercedes Benz \(car.isServiced) не требуется.")
+        }
+    }
+    
+    func addToShowroom(car: inout CarProtocol) {
+        stockCars.removeAll(where: {$0.model == car.model})
+        if car.isServiced {
+            showroomCars.append(car)
+        } else {
+            presaleService(car: &car)
+            showroomCars.append(car)
+        }
+        print("Автомобиль Mercedes Benz \(car.model) перемещен со склада в шоурум.")
+    }
+    
+    func sellCar(car: inout CarProtocol) {
+        let originalText = "Автомобиль Mercedes Benz \(car) продан. Поздравляем с покупкой Вашего нового автомобиля!"
+        //проверка наличия авто у дилера
+        if showroomCars.contains(where: {$0.model == car.model}) == false && stockCars.contains(where: {$0.model == car.model}) == false {
+            print("К сожалению автомобиля Mercedes Benz \(car.model) нет в наличии, но мы можем его заказать. Срок поставки 2 недели.")
+        } else if showroomCars.contains(where: {$0.model == car.model}) || stockCars.contains(where: {$0.model == car.model}) {
+            //проверка выполнения предпродажной подготовки
+            if car.isServiced == false {
+                presaleService(car: &car)
+                car.isServiced = true
+                print(originalText)
+            } else {
+                print ("Предпродажная подготовка не требуется.")
+                print(originalText)
+            }
+        }
+    }
+    
+    func orderCar() {
+        var tempCar: MercedesBenz
+        let randomColorCar = Int.random(in: 0..<colors.count)
+        let randomModelCar = Int.random(in: 0..<audiModels.count)
+        tempCar = .init(model: mercedesModels[randomModelCar], color: colors[randomColorCar], buildDate: 2022, price: mercedesModelsPrice[mercedesModels[randomModelCar]]!, accessories: [], isServiced: false)
+        stockCars.append(tempCar)
+        print("Автомобиль Mercedes Benz \(tempCar) заказан на склад автосалона от импортера.")
+    }
+}
+
+class DealerPorsche: DealerShipProtocol {
+    var name: String
+    var showroomCapacity: Int
+    var stockCars: [CarProtocol] = []
+    var showroomCars: [CarProtocol] = []
+    var cars: [CarProtocol] {
+        showroomCars + stockCars
+        }
+    var slogan: String = "У Porsche нет конкретного слогана для самой марки. Разве что в США коллеги добавляют: «Porsche. There is no substitute». ... Слоган отражает динамичное развитие бренда, выпускающего продукцию в соответствии с современными требованиями клиентов."
+    
+    init(name: String, showroomCapacity: Int) {
+        self.name = name
+        self.showroomCapacity = showroomCapacity
+    }
+    
+    func offerAccesories(access: [String]) {
+        print("Предложение клиенту купить выбранное доп. оборудование из \(access)")
+    }
+    
+    func presaleService(car: inout CarProtocol) {
+        if car.isServiced == false {
+            car.isServiced = true
+            print("Автомобиль Porsche \(car.model) отправлен на предпродажную подготовку.")
+        } else {
+            print("Предпродажная подготовка автомбилю Porsche \(car.isServiced) не требуется.")
+        }
+    }
+    
+    func addToShowroom(car: inout CarProtocol) {
+        stockCars.removeAll(where: {$0.model == car.model})
+        if car.isServiced {
+            showroomCars.append(car)
+        } else {
+            presaleService(car: &car)
+            showroomCars.append(car)
+        }
+        print("Автомобиль Porsche \(car.model) перемещен со склада в шоурум.")
+    }
+    
+    func sellCar(car: inout CarProtocol) {
+        let originalText = "Автомобиль Porsche \(car) продан. Поздравляем с покупкой Вашего нового автомобиля!"
+        //проверка наличия авто у дилера
+        if showroomCars.contains(where: {$0.model == car.model}) == false && stockCars.contains(where: {$0.model == car.model}) == false {
+            print("К сожалению автомобиля \(car.model) нет в наличии, но мы можем его заказать. Срок поставки 2 недели.")
+        } else if showroomCars.contains(where: {$0.model == car.model}) || stockCars.contains(where: {$0.model == car.model}) {
+            //проверка выполнения предпродажной подготовки
+            if car.isServiced == false {
+                presaleService(car: &car)
+                car.isServiced = true
+                print(originalText)
+            } else {
+                print ("Предпродажная подготовка не требуется.")
+                print(originalText)
+            }
+        }
+    }
+    
+    func orderCar() {
+        var tempCar: Porsche
+        let randomColorCar = Int.random(in: 0..<colors.count)
+        let randomModelCar = Int.random(in: 0..<porscheModels.count)
+        tempCar = .init(model: porscheModels[randomModelCar], color: colors[randomColorCar], buildDate: 2022, price: porscheModelsPrice[porscheModels[randomModelCar]]!, accessories: [], isServiced: false)
+        stockCars.append(tempCar)
+        print("Автомобиль Porsche \(tempCar) заказан на склад автосалона от импортера.")
+    }
+}
+
+class DealerBentley: DealerShipProtocol {
+    var name: String
+    var showroomCapacity: Int
+    var stockCars: [CarProtocol] = []
+    var showroomCars: [CarProtocol] = []
+    var cars: [CarProtocol] {
+        showroomCars + stockCars
+        }
+    var slogan: String = "Бентли. Чистое искусство, настоящий драйв."
+    
+    init(name: String, showroomCapacity: Int) {
+        self.name = name
+        self.showroomCapacity = showroomCapacity
+    }
+    
+    func offerAccesories(access: [String]) {
+        print("Предложение клиенту купить выбранное доп. оборудование из \(access)")
+    }
+    
+    func presaleService(car: inout CarProtocol) {
+        if car.isServiced == false {
+            car.isServiced = true
+            print("Автомобиль Bentley \(car.model) отправлен на предпродажную подготовку.")
+        } else {
+            print("Предпродажная подготовка автомбилю Bentley \(car.isServiced) не требуется.")
+        }
+    }
+    
+    func addToShowroom(car: inout CarProtocol) {
+        stockCars.removeAll(where: {$0.model == car.model})
+        if car.isServiced {
+            showroomCars.append(car)
+        } else {
+            presaleService(car: &car)
+            showroomCars.append(car)
+        }
+        
+        print("Автомобиль Bentley \(car.model) перемещен со склада в шоурум.")
+    }
+    
+    func sellCar(car: inout CarProtocol) {
+        let originalText = "Автомобиль Bentley \(car) продан. Поздравляем с покупкой Вашего нового автомобиля!"
+        //проверка наличия авто у дилера
+        if showroomCars.contains(where: {$0.model == car.model}) == false && stockCars.contains(where: {$0.model == car.model}) == false {
+            print("К сожалению автомобиля Bentley \(car.model) нет в наличии, но мы можем его заказать. Срок поставки 2 недели.")
+        } else if showroomCars.contains(where: {$0.model == car.model}) || stockCars.contains(where: {$0.model == car.model}) {
+            //проверка выполнения предпродажной подготовки
+            if car.isServiced == false {
+                presaleService(car: &car)
+                car.isServiced = true
+                print(originalText)
+            } else {
+                print ("Предпродажная подготовка не требуется.")
+                print(originalText)
+            }
+        }
+    }
+    
+    func orderCar() {
+        var tempCar: Bentley
+        let randomColorCar = Int.random(in: 0..<colors.count)
+        let randomModelCar = Int.random(in: 0..<audiModels.count)
+        tempCar = .init(model: bentleyModels[randomModelCar], color: colors[randomColorCar], buildDate: 2022, price: bentleyModelsPrice[bentleyModels[randomModelCar]]!, accessories: [], isServiced: false)
+        stockCars.append(tempCar)
+        print("Автомобиль \(tempCar) заказан на склад автосалона от импортера.")
+    }
+}
+
+
+var audiCentrSamara = DealerAudi(name: "Ауди центр Самара", showroomCapacity: 50)
+var bmwAldis = DealerBMW(name: "БМВ-Алдис Самара", showroomCapacity: 50)
+var mercedesSamaraMotors = DealerMercedesBenz(name: "Самара-моторс Мерседес Бенц", showroomCapacity: 50)
+var porscheCentrSamara = DealerPorsche(name: "Порше-центр Самара", showroomCapacity: 50)
+var bentleyAvilonMoscow = DealerBentley(name: "Бентли-Авилон Москва", showroomCapacity: 50)
+
+
+audiCentrSamara.showroomCars.append(a3)
+audiCentrSamara.showroomCars.append(a5)
+audiCentrSamara.showroomCars.append(rs4)
+audiCentrSamara.stockCars.append(a6)
+audiCentrSamara.stockCars.append(rsq8)
+
+bmwAldis.showroomCars.append(i318)
+bmwAldis.showroomCars.append(d530)
+bmwAldis.stockCars.append(m5cs)
+bmwAldis.stockCars.append(x5m50d)
+bmwAldis.stockCars.append(d750)
+
+mercedesSamaraMotors.showroomCars.append(e200d)
+mercedesSamaraMotors.showroomCars.append(e63amg)
+mercedesSamaraMotors.showroomCars.append(g63amg)
+mercedesSamaraMotors.stockCars.append(s500)
+mercedesSamaraMotors.stockCars.append(gle400d)
+
+porscheCentrSamara.showroomCars.append(cayman)
+porscheCentrSamara.showroomCars.append(cayenneS)
+porscheCentrSamara.showroomCars.append(boxter)
+porscheCentrSamara.stockCars.append(panamera)
+porscheCentrSamara.stockCars.append(cayenne)
+
+bentleyAvilonMoscow.showroomCars.append(bentayga)
+bentleyAvilonMoscow.showroomCars.append(flyingSpur)
+bentleyAvilonMoscow.stockCars.append(continentalGT)
+bentleyAvilonMoscow.stockCars.append(mulsanne)
+bentleyAvilonMoscow.stockCars.append(benleyAzur)
+
+var dealersArray: [DealerShipProtocol] = []
+dealersArray.append(audiCentrSamara as DealerShipProtocol)
+dealersArray.append(bmwAldis as DealerShipProtocol)
+dealersArray.append(mercedesSamaraMotors as DealerShipProtocol)
+dealersArray.append(porscheCentrSamara as DealerShipProtocol)
+dealersArray.append(bentleyAvilonMoscow as DealerShipProtocol)
+
+for i in dealersArray {
+    print ("\(i.name)\n\(i.slogan)\n")
+}
+
+audiCentrSamara.offerAccesories(access: ["Тонировка"])
+bmwAldis.presaleService(car: &m5cs)
+mercedesSamaraMotors.sellCar(car: &e63amg)
+porscheCentrSamara.addToShowroom(car: &cayenneS)
+bentleyAvilonMoscow.orderCar()
+
+extension Audi: SpecialOffer {
+    mutating func addEmergencyPack() {
+        if accessories.contains("аптечка") && accessories.contains("огнетушитель") != true {
+            accessories.append("аптечка")
+            accessories.append("огнетушитель")
+            print("Автомобилю \(model) добавлена аптечка и огнетушитель, как обязательный набор для экплуатации автомобиля.")
+    }
+}
+    
+    mutating func makeSpecialOffer() throws {
+        guard buildDate < 2022 else {
+            throw Errors.impoliteBuild
+        }
+        price *= 0.85
+        print("Автомобиль с прошлогоднего модельного ряда с дополнительной выгодой в 15%.")
+    }
+}
+
+extension DealerAudi: SpecialOffer {
+    func addEmergencyPack() {
+        var tempStockCars = stockCars as! [Audi]
+        var tempShowroomCars = showroomCars as! [Audi]
+        for i in 0..<tempStockCars.count {
+            tempStockCars[i].addEmergencyPack()
+        }
+        for i in 0..<tempShowroomCars.count {
+            tempShowroomCars[i].addEmergencyPack()
+        }
+        print("В автомобили Audi добавлены огнетушитель и аптечка.")
+    }
+    
+    func showroomCars(car: CarProtocol) throws {
+        guard car.buildDate < 2022 else {
+            throw Errors.autoInShowroom
+        }
+    }
+    
+    func makeSpecialOffer() throws {
+        var tempStockCars = stockCars as! [Audi]
+        var tempShowroomCars = showroomCars as! [Audi]
+        for i in 0..<tempStockCars.count {
+            do {
+            try tempStockCars[i].makeSpecialOffer()
+            } catch Errors.impoliteBuild {
+                print("Автомобиль \(tempStockCars[i].model) не удовлетворяет требованиям года выпуска")
+            }
+            tempStockCars.append(tempShowroomCars[i])
+            tempStockCars.remove(at: i)
+        }
+        for i in 0..<tempShowroomCars.count {
+            do {
+            try tempShowroomCars[i].makeSpecialOffer()
+                try showroomCars(car: tempShowroomCars[i])
+            } catch Errors.impoliteBuild {
+                print("Автомобиль \(tempShowroomCars[i].model) не удовлетворяет требованиям года выпуска")
+            } catch Errors.autoInShowroom {
+                print("Автомобиль \(tempStockCars[i].model) уже перемещен в шоурум.")
+            }
+        stockCars = tempStockCars
+        showroomCars = tempShowroomCars
+        }
+    }
+}
+
+    extension BMW: SpecialOffer {
+        mutating func addEmergencyPack() {
+            if accessories.contains("аптечка") && accessories.contains("огнетушитель") != true {
+                accessories.append("аптечка")
+                accessories.append("огнетушитель")
+                print("Автомобилю \(model) добавлена аптечка и огнетушитель, как обязательный набор для экплуатации автомобиля.")
+        }
+    }
+        
+        mutating func makeSpecialOffer() throws {
+            guard buildDate < 2022 else {
+                throw Errors.impoliteBuild
+            }
+            price *= 0.85
+            print("Автомобиль с прошлогоднего модельного ряда с дополнительной выгодой в 15%.")
+        }
+    }
+
+    extension DealerBMW: SpecialOffer {
+        func addEmergencyPack() {
+            var tempStockCars = stockCars as! [BMW]
+            var tempShowroomCars = showroomCars as! [BMW]
+            for i in 0..<tempStockCars.count {
+                tempStockCars[i].addEmergencyPack()
+            }
+            for i in 0..<tempShowroomCars.count {
+                tempShowroomCars[i].addEmergencyPack()
+            }
+            print("В автомобили BMW добавлены огнетушитель и аптечка.")
+        }
+        
+        func autoShowroom(car: CarProtocol) throws {
+            guard car.buildDate < 2022 else {
+                throw Errors.autoInShowroom
+            }
+        }
+        
+        func makeSpecialOffer() throws {
+            var tempStockCars = stockCars as! [BMW]
+            var tempShowroomCars = showroomCars as! [BMW]
+            for i in 0..<tempStockCars.count {
+                do {
+                try tempStockCars[i].makeSpecialOffer()
+                } catch Errors.impoliteBuild {
+                    print("Автомобиль \(tempStockCars[i].model) не удовлетворяет требованиям года выпуска")
+                }
+                tempStockCars.append(tempShowroomCars[i])
+                tempStockCars.remove(at: i)
+            }
+            for i in 0..<tempShowroomCars.count {
+                do {
+                try tempShowroomCars[i].makeSpecialOffer()
+                    try autoShowroom(car: tempShowroomCars[i])
+                } catch Errors.impoliteBuild {
+                    print("Автомобиль \(tempStockCars[i].model) не удовлетворяет требованиям года выпуска")
+                } catch Errors.autoInShowroom {
+                    print("Автомобиль \(tempShowroomCars[i].model) уже перемещен в шоурум.")
+                }
+            stockCars = tempStockCars
+            showroomCars = tempShowroomCars
+            }
+        }
+    }
+
+extension Bentley: SpecialOffer {
+    mutating func addEmergencyPack() {
+        if accessories.contains("аптечка") && accessories.contains("огнетушитель") != true {
+            accessories.append("аптечка")
+            accessories.append("огнетушитель")
+            print("Автомобилю \(model) добавлена аптечка и огнетушитель, как обязательный набор для экплуатации автомобиля.")
+    }
+}
+    
+    mutating func makeSpecialOffer() throws {
+        guard buildDate < 2022 else {
+            throw Errors.impoliteBuild
+        }
+        price *= 0.85
+        print("Автомобиль с прошлогоднего модельного ряда с дополнительной выгодой в 15%.")
+    }
+}
+
+extension DealerBentley: SpecialOffer {
+    func addEmergencyPack() {
+        var tempStockCars = stockCars as! [Bentley]
+        var tempShowroomCars = showroomCars as! [Bentley]
+        for i in 0..<tempStockCars.count {
+            tempStockCars[i].addEmergencyPack()
+        }
+        for i in 0..<tempShowroomCars.count {
+            tempShowroomCars[i].addEmergencyPack()
+        }
+        print("В автомобили Bentley добавлены огнетушитель и аптечка.")
+    }
+    
+    func autoShowroom(car: CarProtocol) throws {
+        guard car.buildDate < 2022 else {
+            throw Errors.autoInShowroom
+        }
+    }
+    
+    func makeSpecialOffer() throws {
+        var tempStockCars = stockCars as! [Bentley]
+        var tempShowroomCars = showroomCars as! [Bentley]
+        for i in 0..<tempStockCars.count {
+            do {
+            try tempStockCars[i].makeSpecialOffer()
+            } catch Errors.impoliteBuild {
+                print("Автомобиль \(tempStockCars[i].model) не удовлетворяет требованиям года выпуска")
+            }
+            tempStockCars.append(tempShowroomCars[i])
+            tempStockCars.remove(at: i)
+        }
+        for i in 0..<tempShowroomCars.count {
+            do {
+            try tempShowroomCars[i].makeSpecialOffer()
+                try autoShowroom(car: tempShowroomCars[i])
+            } catch Errors.impoliteBuild {
+                print("Автомобиль \(tempShowroomCars[i].model) не удовлетворяет требованиям года выпуска")
+            } catch Errors.autoInShowroom {
+                print ("Автомобиль \(tempShowroomCars[i].model) уже перемещен в шоурум.")
+            }
+        stockCars = tempStockCars
+        showroomCars = tempShowroomCars
+        }
+    }
+}
+
+bentleyAvilonMoscow.addEmergencyPack()
+try audiCentrSamara.makeSpecialOffer()
+
